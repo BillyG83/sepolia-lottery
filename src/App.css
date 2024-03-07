@@ -30,6 +30,7 @@ body {
 }
 
 main {
+  align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -41,6 +42,7 @@ main {
   background-color: var(--white);
   border-radius: 4px;
   margin: 20px;
+  max-width: 350px;
   padding: 28px;
 }
 
@@ -98,6 +100,13 @@ button {
   font-weight: 600;
   outline: none;
   padding: 8px;
+}
+
+button:disabled {
+  cursor: progress;
+  filter: grayscale(0.5);
+  pointer-events: none;
+  touch-action: none;
 }
 
 .info {

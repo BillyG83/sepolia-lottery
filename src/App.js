@@ -7,6 +7,11 @@ const App = () => {
   const [balance, setBalance] = useState('')
   const [manager, setManager] = useState('')
   const [players, setPlayers] = useState([])
+  const [isFetching, setIsFetching] = useState(false)
+
+  const ethereumAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;
+  const isValidEthereumAddress = (address) => ethereumAddressRegex.test(address);
+  const addressInput = 'address-input'
 
   const getBalance = async () => {
     try {
@@ -16,7 +21,6 @@ const App = () => {
       console.error(error)
     }
   }
-  
   const getManager = async () => {
     try {
       const result = await lottery.methods.manager().call()
@@ -25,7 +29,6 @@ const App = () => {
       console.error(error)
     }
   }
-
   const getPlayers = async () => {
     try {
       const result = await lottery.methods.getPlayers().call()
@@ -35,11 +38,27 @@ const App = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const form = e.target;
+    const form = e.target
     const input = form[0]
-    console.log(input.value);
+
+    if (!isValidEthereumAddress(input.value)) {
+      alert(`Sorry! ${input.value} does not appear to be a Ethereum wallet address`)
+      return
+    }
+
+    try {
+      setIsFetching(true)
+      await lottery.methods.enter().send({
+        from: input.value,
+        value: web3.utils.toWei(0.1, 'ether')
+      })
+    } catch (error) {
+      alert(`Oh dear! You were unable to enter with wallet address: ${input.value}`)
+      console.error(error)
+    }
+    setIsFetching(false)
     form.reset()
   }
 
@@ -52,8 +71,11 @@ const App = () => {
   return(
     <main>
       <div className='dapp'>
-        <h1>Sepolia Lottery</h1>
-        <p className='subtitle'>Here we go for another excited round!</p>
+        <header>
+          <h1>Sepolia Lottery</h1>
+          <p className='subtitle'>Here we go for another excited round!</p>
+        </header>
+
         <div className='info'>
           <div className='icon'>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
@@ -68,13 +90,23 @@ const App = () => {
             <p>Prize: {balance ? `${web3.utils.fromWei(balance, 'ether')}eth` : '0eth'}</p>
           </div>
         </div>
+
         <form onSubmit={(e) => handleSubmit(e)}>
-          <h2>Feeling lucky punk?</h2>
-          <p>Join the Sepolia lottery, drawn each Sunday evening at sundown</p>
-          <input placeholder='enter your wallet address' />
-          <button type="submit">enter</button>
+          <h2>Join the Sepolia lottery!</h2>
+          <p>Enter this weeks draw for only <strong>0.1eth</strong>.
+          <br /><br />The prize is drawn each Sunday evening at sun down</p>
+          <input 
+            autoComplete='true'
+            id={addressInput}
+            placeholder='enter your wallet address'
+            type='text'
+          />
+          <button disabled={isFetching} type="submit">{isFetching ? 'check your wallet' : 'Enter'}</button>
         </form>
-        <p className='small-print'>Game manager: {manager}</p>
+
+        <footer>
+          <p className='small-print'>Game manager: {manager}</p>
+        </footer>
       </div>
     </main>
   )
