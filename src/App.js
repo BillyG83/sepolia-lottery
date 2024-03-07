@@ -72,7 +72,7 @@ const App = () => {
           <h2>Feeling lucky punk?</h2>
           <p>Join the Sepolia lottery, drawn each Sunday evening at sundown</p>
           <input placeholder='enter your wallet address' />
-          <button type="submit">join</button>
+          <button type="submit">enter</button>
         </form>
         <p className='small-print'>Game manager: {manager}</p>
       </div>
